@@ -1,9 +1,16 @@
 {
   "name": "SmartByte Technologies Admin",
   "short_name": "SmartByte Admin",
-  "start_url": "./SmartByte_Admin_Software_English.html",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f3f6fb",
   "theme_color": "#10264a",
-  "icons": [{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}]
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
