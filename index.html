@@ -61,65 +61,71 @@ async function deliverJpg(blob,name,label){
 window.downloadQuoteJpg=async function(qid){
  var q=db.quotations.find(function(a){return a.id===qid});if(!q)return;
  var c=db.customers.find(function(a){return a.id===q.customer})||{},cv=document.createElement('canvas');
- cv.width=1200;cv.height=1697;var x=cv.getContext('2d');
- var navy='#08295f',blue='#124d91',gold='#f4c323',ink='#17243a',muted='#58677c',pale='#edf3fb';
+ cv.width=1200;cv.height=1800;var x=cv.getContext('2d');
+ var navy='#08295f',blue='#104b91',gold='#f5c323',ink='#101c32',muted='#53627a',pale='#edf3fb',white='#fff';
  function rect(a,b,w,h,col){x.fillStyle=col;x.fillRect(a,b,w,h)}
  function txt(v,a,b,z,col,w,align){x.font=(w||'normal')+' '+z+'px Arial,sans-serif';x.fillStyle=col;x.textAlign=align||'left';x.fillText(String(v==null?'':v),a,b)}
  function line(a,b,d,e,col,sw){x.strokeStyle=col;x.lineWidth=sw||1;x.beginPath();x.moveTo(a,b);x.lineTo(d,e);x.stroke()}
  function round(a,b,w,h,r,col){x.fillStyle=col;x.beginPath();x.roundRect(a,b,w,h,r);x.fill()}
- function fit(v,max,z){x.font='bold '+z+'px Arial';var s=String(v||'');while(x.measureText(s).width>max&&z>14){z--;x.font='bold '+z+'px Arial'}return z}
- rect(0,0,1200,1697,'#e9eef6');round(18,18,1164,1661,18,'#fff');
- var gr=x.createLinearGradient(0,0,1200,0);gr.addColorStop(0,navy);gr.addColorStop(.72,blue);gr.addColorStop(1,'#0a3475');rect(18,18,1164,290,gr);
- // Gold corner ribbons and SB mark
- x.fillStyle=gold;x.beginPath();x.moveTo(18,18);x.lineTo(250,18);x.lineTo(18,112);x.fill();
- x.beginPath();x.arc(145,154,91,0,Math.PI*2);x.strokeStyle=gold;x.lineWidth=8;x.stroke();
- txt('SB',98,178,76,'#fff','bold');txt('SMARTBYTE',270,105,64,'#fff','bold');txt('TECHNOLOGIES',270,166,52,gold,'bold');
- txt('Sales  •  Service  •  Support',275,211,27,'#fff','bold');txt('Your Trusted IT Partner',275,254,25,'#e8efff','bold');
- line(805,55,805,266,'#b9c9e5',2);
- ['Laptop & Desktop Service','CCTV Installation','Networking Solutions','IT Support & AMC','Data Recovery'].forEach(function(v,i){x.beginPath();x.arc(845,83+i*39,12,0,Math.PI*2);x.fillStyle=gold;x.fill();txt('✓',838,90+i*39,18,navy,'bold');txt(v,870,91+i*39,22,'#fff','bold')});
- rect(18,308,1164,7,gold);rect(18,315,1164,66,'#f6f9fd');
- txt('☎  9702387036',62,359,34,navy,'bold');line(438,328,438,369,'#9aabc3',2);txt('WhatsApp Support',470,359,27,'#13864b','bold');line(770,328,770,369,'#9aabc3',2);txt('⌖  Kurla West, Mumbai',800,359,26,navy,'bold');
- // Customer and quotation detail cards
- round(35,402,548,208,12,pale);round(602,402,563,208,12,pale);
- rect(35,402,548,48,navy);rect(602,402,563,48,navy);
- txt('●  Customer Details',58,435,25,'#fff','bold');txt('▤  Quotation Details',625,435,25,'#fff','bold');
- txt('Name',58,486,21,muted,'bold');txt(':  '+(c.name||'-'),165,486,23,ink,'bold');
- txt('Mobile',58,526,21,muted,'bold');txt(':  '+(c.phone||'-'),165,526,22,ink);
- txt('Address',58,566,21,muted,'bold');txt(':  '+(c.address||'-').slice(0,39),165,566,19,ink);
- txt('Quote No.',625,486,21,muted,'bold');txt(':  '+q.id,760,486,22,ink,'bold');
- txt('Date',625,526,21,muted,'bold');txt(':  '+(q.date||'-'),760,526,22,ink);
- txt('Valid Until',625,566,21,muted,'bold');txt(':  '+(q.validUntil||'As discussed'),760,566,22,ink);
- if(q.title){txt('Project: '+q.title,48,646,23,navy,'bold')}
- // Items table
- var top=q.title?675:650, head=top, rowH= q.items.length>7?48:57, shown=q.items.slice(0,10);
- rect(35,head,1130,54,navy);
- txt('Sr.No.',55,head+35,20,'#fff','bold');txt('Service / Product',145,head+35,21,'#fff','bold');txt('Description',425,head+35,20,'#fff','bold');txt('Qty',805,head+35,20,'#fff','bold');txt('Rate (₹)',900,head+35,20,'#fff','bold');txt('Amount (₹)',1040,head+35,20,'#fff','bold');
- var yy=head+54;
- shown.forEach(function(it,i){rect(35,yy,1130,rowH,i%2?'#f3f6fb':'#fff');line(35,yy+rowH,1165,yy+rowH,'#b9c8dc',1);txt(i+1,65,yy+rowH*.65,19,ink,'bold');txt(String(it.name||'').slice(0,24),145,yy+rowH*.65,19,ink,'bold');txt(String(it.description||it.details||'').slice(0,34),425,yy+rowH*.65,17,ink);txt(it.qty,815,yy+rowH*.65,19,ink);txt(Number(it.rate||0).toLocaleString('en-IN'),900,yy+rowH*.65,19,ink);txt(Number(it.amount||0).toLocaleString('en-IN'),1040,yy+rowH*.65,19,ink,'bold');yy+=rowH});
- if(q.items.length>10){txt('Additional items: '+(q.items.length-10)+' more',55,yy+26,17,muted);yy+=38}
- // Visual service strip with simple computer / laptop / CCTV illustrations
- var visualY=Math.max(yy+22,1230);visualY=Math.min(visualY,1260);
- rect(42,visualY,500,142,'#f5f8fc');
- // desktop monitor
- round(72,visualY+18,150,88,7,'#202b3c');rect(80,visualY+26,134,70,'#2474b9');line(147,visualY+106,147,visualY+126,'#48566a',8);line(113,visualY+127,181,visualY+127,'#48566a',7);
- // laptop
- round(270,visualY+28,145,85,6,'#29364b');rect(278,visualY+36,129,69,'#3a8acb');x.fillStyle='#aeb9c8';x.beginPath();x.moveTo(260,116+visualY);x.lineTo(425,116+visualY);x.lineTo(410,128+visualY);x.lineTo(275,128+visualY);x.fill();
- // CCTV lens
- x.beginPath();x.arc(475,visualY+67,34,0,Math.PI*2);x.fillStyle='#d7e0ed';x.fill();x.strokeStyle='#45546a';x.lineWidth=5;x.stroke();x.beginPath();x.arc(475,visualY+67,14,0,Math.PI*2);x.fillStyle='#17243a';x.fill();
- // total block
- var totalY=visualY+2;round(570,totalY,590,142,10,'#f1f5fb');rect(570,totalY,360,47,navy);rect(570,totalY+48,360,43,blue);rect(570,totalY+92,590,50,gold);
- txt('Total Estimate',595,totalY+32,25,'#fff','bold');txt('₹ '+Number(q.total||0).toLocaleString('en-IN'),1128,totalY+33,29,navy,'bold','right');
- txt('Quotation valid until',595,totalY+77,20,'#fff','bold');txt(q.validUntil||'As discussed',1128,totalY+77,20,ink,'bold','right');
- txt('ESTIMATED TOTAL',595,totalY+125,24,navy,'bold');txt('₹ '+Number(q.total||0).toLocaleString('en-IN'),1128,totalY+127,29,navy,'bold','right');
- // terms and payment panels
- var panelY=1420;round(38,panelY,530,165,16,'#f8faff');round(580,panelY,582,165,16,'#f8faff');
- rect(38,panelY,530,48,navy);rect(580,panelY,582,48,navy);
- txt('☑  Terms & Conditions',65,panelY+33,24,'#fff','bold');txt('UPI Payment',610,panelY+33,24,'#fff','bold');
- txt('✓  Estimate subject to inspection / confirmation.',62,panelY+78,18,ink);txt('✓  Work will begin after customer approval.',62,panelY+108,18,ink);txt('✓  Thank you for your enquiry!',62,panelY+138,18,ink);
- txt('Scan & Pay / UPI details can be shared',610,panelY+83,20,ink,'bold');txt('on confirmation. No advance assumed.',610,panelY+115,19,muted);txt('SMARTBYTE TECHNOLOGIES',610,panelY+145,21,blue,'bold');
- // Footer
- rect(18,1600,1164,79,navy);rect(18,1600,1164,6,gold);txt('Thank You for Choosing',58,1640,23,'#fff','bold');txt('SMARTBYTE TECHNOLOGIES',58,1670,28,gold,'bold');txt('Customer Care  •  9702387036',1128,1654,21,'#fff','bold','right');
+ function wrap(v,max,z,weight){x.font=(weight||'normal')+' '+z+'px Arial,sans-serif';var words=String(v||'').split(/\\s+/),out=[],lineText='';words.forEach(function(word){var test=lineText?lineText+' '+word:word;if(x.measureText(test).width>max&&lineText){out.push(lineText);lineText=word}else lineText=test});if(lineText)out.push(lineText);return out}
+ function fit(v,max,z){while(z>14){x.font='bold '+z+'px Arial';if(x.measureText(String(v||'')).width<=max)break;z--}return z}
+ rect(0,0,1200,1800,'#e9eef6');round(15,15,1170,1770,20,white);
+ var gr=x.createLinearGradient(0,0,1200,0);gr.addColorStop(0,navy);gr.addColorStop(.72,blue);gr.addColorStop(1,'#0a3475');rect(15,15,1170,300,gr);
+ // Curved gold corner accents and SB logo
+ x.fillStyle=gold;x.beginPath();x.moveTo(15,15);x.lineTo(270,15);x.quadraticCurveTo(155,45,15,150);x.fill();
+ x.beginPath();x.arc(145,164,91,0,Math.PI*2);x.strokeStyle=gold;x.lineWidth=8;x.stroke();
+ txt('SB',92,188,76,white,'bold');txt('SMARTBYTE',270,105,64,white,'bold');txt('TECHNOLOGIES',270,166,52,gold,'bold');
+ txt('Sales  •  Service  •  Support',275,211,27,white,'bold');txt('Your Trusted IT Partner',275,254,25,'#e8efff','bold');
+ line(805,55,805,270,'#d9e5f8',3);
+ ['Laptop & Desktop Service','CCTV Installation','Networking Solutions','IT Support & AMC','Data Recovery'].forEach(function(v,i){x.beginPath();x.arc(845,82+i*41,13,0,Math.PI*2);x.fillStyle=gold;x.fill();txt('✓',838,89+i*41,18,navy,'bold');txt(v,870,90+i*41,22,white,'bold')});
+ // Contact strip
+ rect(15,315,1170,7,gold);rect(15,322,1170,78,'#f7f9fd');
+ txt('☎  9702387036',48,374,38,navy,'bold');line(448,337,448,385,'#9aabc3',3);txt('●  WhatsApp Support',480,374,29,'#178a4b','bold');line(805,337,805,385,'#9aabc3',3);txt('⌖  Kurla West, Mumbai',835,374,27,navy,'bold');
+ // Customer and quotation detail panels
+ round(28,420,555,245,12,pale);round(602,420,570,245,12,pale);rect(28,420,555,56,navy);rect(602,420,570,56,navy);
+ txt('●  Customer Details',58,458,28,white,'bold');txt('▤  QUOTATION Details',630,458,28,white,'bold');
+ txt('Name',58,520,23,ink,'bold');txt(':',158,520,23,ink,'bold');txt(String(c.name||'-').slice(0,30),190,520,24,ink,'bold');
+ txt('Mobile',58,565,23,ink,'bold');txt(':',158,565,23,ink,'bold');txt(String(c.phone||'-'),190,565,23,ink,'bold');
+ txt('Address',58,610,23,ink,'bold');txt(':',158,610,23,ink,'bold');
+ var addr=wrap(c.address||'-',365,21,'normal');addr.slice(0,2).forEach(function(v,i){txt(v,190,610+i*29,21,ink,'normal')});
+ txt('Quote No.',630,520,23,ink,'bold');txt(':',770,520,23,ink,'bold');txt(String(q.id),800,520,22,ink,'bold');
+ txt('Date',630,565,23,ink,'bold');txt(':',770,565,23,ink,'bold');txt(String(q.date||'-'),800,565,23,ink,'bold');
+ txt('Job Type',630,610,23,ink,'bold');txt(':',770,610,23,ink,'bold');txt(String(q.title||'Service / Support').slice(0,25),800,610,22,ink,'bold');
+ txt('Valid Until',630,650,19,muted,'bold');txt(':  '+String(q.validUntil||'As discussed'),770,650,19,ink,'normal');
+ // Itemized service table
+ var items=q.items||[],shown=items.slice(0,8),tableY=700,rowH=64;
+ rect(28,tableY,1144,60,navy);
+ var cols=[48,145,430,805,895,1040];
+ ['Sr.No.','Service / Product','Description','Qty','Rate (₹)','Amount (₹)'].forEach(function(v,i){txt(v,cols[i],tableY+39,i===0?19:21,white,'bold')});
+ var yy=tableY+60;
+ shown.forEach(function(it,i){rect(28,yy,1144,rowH,i%2?'#f1f5fb':white);line(28,yy+rowH,1172,yy+rowH,'#aebed2',1);line(130,yy,130,yy+rowH,'#aebed2',1);line(415,yy,415,yy+rowH,'#aebed2',1);line(785,yy,785,yy+rowH,'#aebed2',1);line(875,yy,875,yy+rowH,'#aebed2',1);line(1020,yy,1020,yy+rowH,'#aebed2',1);
+ txt(i+1,75,yy+39,21,ink,'bold');var nm=wrap(it.name||'Service',260,21,'bold');nm.slice(0,2).forEach(function(v,j){txt(v,150,yy+29+j*24,20,ink,'bold')});
+ var desc=wrap(it.description||it.details||'As discussed',345,18,'normal');desc.slice(0,2).forEach(function(v,j){txt(v,430,yy+27+j*22,18,ink,'normal')});
+ txt(it.qty||1,830,yy+39,21,ink,'bold','center');txt(Number(it.rate||0).toLocaleString('en-IN'),900,yy+39,20,ink,'bold');txt(Number(it.amount||0).toLocaleString('en-IN'),1040,yy+39,20,ink,'bold');yy+=rowH});
+ if(items.length>8){txt('Additional items: '+(items.length-8)+' more',50,yy+25,18,muted);yy+=34}
+ // Product illustration strip and estimate totals, matching reference composition
+ var visualY=Math.max(yy+25,1320);if(visualY>1370)visualY=1370;
+ rect(32,visualY,505,175,'#f4f7fc');
+ // Desktop monitor / tower
+ round(55,visualY+18,190,112,8,'#17263e');rect(64,visualY+27,172,92,'#1874c8');rect(252,visualY+20,48,120,'#29374e');line(150,visualY+130,150,153,'#46566e',9);line(110,visualY+154,192,154,'#46566e',8);
+ // Laptop
+ round(330,visualY+40,150,95,6,'#26354c');rect(338,visualY+48,134,78,'#287dc2');x.fillStyle='#aeb9c8';x.beginPath();x.moveTo(318,visualY+137);x.lineTo(493,visualY+137);x.lineTo(478,visualY+150);x.lineTo(333,visualY+150);x.fill();
+ // CCTV dome camera
+ x.beginPath();x.arc(485,visualY+22,30,Math.PI,Math.PI*2);x.fillStyle='#d8e0eb';x.fill();x.strokeStyle='#48566b';x.lineWidth=4;x.stroke();x.beginPath();x.arc(485,visualY+27,15,0,Math.PI*2);x.fillStyle='#17243a';x.fill();
+ // Totals box
+ var totalY=visualY+5;round(560,totalY,610,170,12,'#f1f5fb');rect(560,totalY,365,54,navy);rect(560,totalY+55,365,48,blue);rect(560,totalY+104,610,66,gold);
+ txt('Total Estimate',585,totalY+36,26,white,'bold');txt('₹ '+Number(q.total||0).toLocaleString('en-IN'),1140,totalY+37,30,navy,'bold','right');
+ txt('Received Amount',585,totalY+87,24,white,'bold');txt('₹ 0',1140,totalY+88,27,ink,'bold','right');
+ txt('Balance Amount',585,totalY+147,28,navy,'bold');txt('₹ '+Number(q.total||0).toLocaleString('en-IN'),1140,totalY+148,30,navy,'bold','right');
+ // Terms and payment panels
+ var panelY=visualY+202;round(32,panelY,525,170,16,'#f8faff');round(575,panelY,597,170,16,'#f8faff');rect(32,panelY,525,53,navy);rect(575,panelY,597,53,navy);
+ txt('☑  Terms & Conditions',60,panelY+36,25,white,'bold');txt('Scan & Pay',610,panelY+36,25,white,'bold');line(870,panelY,870,panelY+170,navy,3);txt('UPI Accepted',905,panelY+36,25,white,'bold');
+ ['✓  Estimate subject to inspection / confirmation.','✓  Work starts after customer approval.','✓  Payment due as agreed.','✓  Thank you for your business!'].forEach(function(v,i){txt(v,58,panelY+86+i*27,18,ink,'bold')});
+ txt('UPI payment details',610,panelY+91,22,ink,'bold');txt('will be shared on confirmation.',610,panelY+123,19,muted);txt('GPay  •  PhonePe  •  Paytm',900,panelY+104,21,blue,'bold');
+ // Branded curved footer band
+ rect(15,1740,1170,45,navy);rect(15,1740,1170,6,gold);txt('Thank You for Choosing',55,1770,22,white,'bold');txt('SMARTBYTE TECHNOLOGIES',390,1770,25,gold,'bold');txt('Customer Care  9702387036',1145,1770,20,white,'bold','right');
  var blob=await new Promise(function(resolve){cv.toBlob(resolve,'image/jpeg',.96)});
+ if(!blob){alert('Quotation JPG तयार झाली नाही.');return}
  await deliverJpg(blob,'SMARTBYTE-QUOTATION-'+q.id+'.jpg','QUOTATION '+q.id);
 };
 
