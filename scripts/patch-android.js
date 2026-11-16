@@ -36,6 +36,7 @@ const javaRoot = path.join(process.cwd(),'android','app','src','main','java');
 function walk(dir){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,ent.name);if(ent.isDirectory())walk(p);else if(ent.name==='MainActivity.java')patchMain(p)}}
 function patchMain(file){
   let s=fs.readFileSync(file,'utf8');
+  if(!s.includes('import android.os.Bundle;')) s=s.replace(/(package [^;]+;)/, '$1\\n\\nimport android.os.Bundle;');
   if(!s.includes('JpgDownloadPlugin.class')){
     s=s.replace(/(public void onCreate\\(Bundle savedInstanceState\\)\\s*\\{)/, '$1\\n        registerPlugin(JpgDownloadPlugin.class);');
     if(!s.includes('JpgDownloadPlugin.class')) s=s.replace(/(public class MainActivity extends BridgeActivity \\{)/, '$1\\n    @Override\\n    public void onCreate(Bundle savedInstanceState) {\\n        registerPlugin(JpgDownloadPlugin.class);\\n        super.onCreate(savedInstanceState);\\n    }');
