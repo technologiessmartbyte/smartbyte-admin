@@ -70,7 +70,9 @@ drawCrop(photos[0],80,376,510,210);drawCrop(photos[1],610,376,510,210);
 rounded(82,392,500,170,14,'#e8eff7','#cbd8e6');rounded(618,392,500,170,14,'#e8eff7','#cbd8e6');
 text('LAPTOP REPAIR',332,500,30,'#174d70','bold','center');text('DESKTOP SUPPORT',868,500,30,'#174d70','bold','center');
 }
-text('LAPTOP REPAIR & UPGRADES',335,616,17,'#174d70','bold','center');text('DESKTOP & IT SUPPORT',865,616,17,'#174d70','bold','center');
+const serviceItems=[['▱','LAPTOP REPAIR'],['▣','DESKTOP SUPPORT'],['◉','CCTV CAMERA'],['⚙','SOFTWARE & IT']];
+const startX=75;
+serviceItems.forEach((item,i)=>{const x=startX+i*265;ctx.beginPath();ctx.arc(x+24,616,18,0,Math.PI*2);ctx.fillStyle='#e2eef5';ctx.fill();text(item[0],x+24,623,19,'#174d70','bold','center');text(item[1],x+50,622,14,'#174d70','bold')});
 text('BILL TO',82,710,19,'#64748b','bold');text('INVOICE DETAILS',650,710,19,'#64748b','bold');
 rounded(64,735,510,208,16,'#f8fafc','#e2e8f0');rounded(600,735,536,208,16,'#f8fafc','#e2e8f0');
 text(customer.name||'Customer',88,790,32,'#10264a','bold');wrap('Mobile: '+(customer.phone||customer.alt||'-'),88,836,450,30,21,'#475569');wrap('Address: '+(customer.address||'-'),88,876,450,27,19,'#64748b', 'normal',2);
