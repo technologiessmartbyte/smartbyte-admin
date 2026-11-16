@@ -1,10 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+
 const htmlPath = path.join(process.cwd(), 'www', 'index.html');
 let html = fs.readFileSync(htmlPath, 'utf8');
 const start = html.indexOf('async function deliverJpg(');
 const end = html.indexOf('\n\nwindow.downloadQuoteJpg', start);
 if (start < 0 || end < 0) throw new Error('Could not locate JPG delivery function');
+
 const replacement = `async function deliverJpg(blob,name,label){
   if(!blob){alert('JPG तयार झाले नाही.');return}
   try{await saveDownloadEntry(blob,name,label)}catch(e){console.error(e)}
@@ -30,24 +32,50 @@ const replacement = `async function deliverJpg(blob,name,label){
   setTimeout(()=>URL.revokeObjectURL(url),30000);
   alert('JPG तयार झाले. Downloads फोल्डर तपासा.');
 }`;
-html = html.slice(0,start) + replacement + html.slice(end);
+html = html.slice(0, start) + replacement + html.slice(end);
 fs.writeFileSync(htmlPath, html);
-const javaRoot = path.join(process.cwd(),'android','app','src','main','java');
-function walk(dir){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,ent.name);if(ent.isDirectory())walk(p);else if(ent.name==='MainActivity.java')patchMain(p)}}
-function patchMain(file){
-  let s=fs.readFileSync(file,'utf8');
-  if(!s.includes('import android.os.Bundle;')) s=s.replace(/(package [^;]+;)/, '$1\\n\\nimport android.os.Bundle;');
-  if(!s.includes('JpgDownloadPlugin.class')){
-    s=s.replace(/(public void onCreate\\(Bundle savedInstanceState\\)\\s*\\{)/, '$1\\n        registerPlugin(JpgDownloadPlugin.class);');
-    if(!s.includes('JpgDownloadPlugin.class')) s=s.replace(/(public class MainActivity extends BridgeActivity \\{)/, '$1\\n    @Override\\n    public void onCreate(Bundle savedInstanceState) {\\n        registerPlugin(JpgDownloadPlugin.class);\\n        super.onCreate(savedInstanceState);\\n    }');
-    if(!s.includes('JpgDownloadPlugin.class')) throw new Error('Unable to register JPG plugin in MainActivity');
-    fs.writeFileSync(file,s);
+
+const javaRoot = path.join(process.cwd(), 'android', 'app', 'src', 'main', 'java');
+function findMainActivity(dir) {
+  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, ent.name);
+    if (ent.isDirectory()) {
+      const found = findMainActivity(full);
+      if (found) return found;
+    } else if (ent.name === 'MainActivity.java') return full;
   }
+  return null;
 }
-walk(javaRoot);
-const pluginDir=path.join(javaRoot,'com','smartbyte','technologies');
-fs.mkdirSync(pluginDir,{recursive:true});
-const plugin = `package com.smartbyte.technologies;
+const mainActivity = findMainActivity(javaRoot);
+if (!mainActivity) throw new Error('MainActivity.java not found after Capacitor sync');
+
+let source = fs.readFileSync(mainActivity, 'utf8');
+const packageMatch = source.match(/^package\s+([A-Za-z0-9_.]+);/m);
+if (!packageMatch) throw new Error('Could not read MainActivity package');
+const packageName = packageMatch[1];
+if (!source.includes('import android.os.Bundle;')) {
+  source = source.replace(/^(package\s+[A-Za-z0-9_.]+;)/m, '$1\n\nimport android.os.Bundle;');
+}
+if (!source.includes('JpgDownloadPlugin.class')) {
+  const classOpen = source.indexOf('extends BridgeActivity');
+  const brace = classOpen < 0 ? -1 : source.indexOf('{', classOpen);
+  if (brace < 0) throw new Error('Could not locate BridgeActivity class');
+  const classClose = source.lastIndexOf('}');
+  if (classClose < brace) throw new Error('Could not locate MainActivity class end');
+  const method = `
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(JpgDownloadPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+`;
+  source = source.slice(0, classClose) + method + source.slice(classClose);
+  fs.writeFileSync(mainActivity, source);
+}
+
+const pluginDir = path.join(javaRoot, ...packageName.split('.'));
+fs.mkdirSync(pluginDir, { recursive: true });
+const plugin = `package ${packageName};
 
 import android.content.ContentValues;
 import android.net.Uri;
@@ -99,5 +127,5 @@ public class JpgDownloadPlugin extends Plugin {
     }
   }
 }`;
-fs.writeFileSync(path.join(pluginDir,'JpgDownloadPlugin.java'),plugin);
+fs.writeFileSync(path.join(pluginDir, 'JpgDownloadPlugin.java'), plugin);
 console.log('Patched Android native JPG Downloads support.');
