@@ -34,38 +34,69 @@ w.document.open();w.document.write(html);w.document.close();
 };window.sendBillWhatsApp=async jobId=>{
 let j=db.jobs.find(x=>x.id===jobId);if(!j)return;
 let customer=db.customers.find(x=>x.id===j.customer)||{};
-const normalize=n=>{let p=String(n||'').replace(/\\D/g,'');if(p.length===10)return '91'+p;if(p.length===11&&p.startsWith('0'))return '91'+p.slice(1);if(p.length===12&&p.startsWith('91'))return p;return ''};
-let phone=normalize(customer.phone)||normalize(customer.alt);
-if(!phone){alert('या ग्राहकाचा योग्य 10 अंकी मोबाइल नंबर Customer Details मध्ये तपासा.');return}
 let due=Math.max(0,Number(j.charge||0)-Number(j.paid||0));
-let canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1580;
-let ctx=canvas.getContext('2d');
-const box=(x,y,w,h,r,fill,stroke)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}};
-ctx.fillStyle='#edf2f8';ctx.fillRect(0,0,1200,1580);box(32,32,1136,1516,30,'#fff','#dce5ef');
-let g=ctx.createLinearGradient(32,32,1168,330);g.addColorStop(0,'#0b1f3a');g.addColorStop(1,'#176b78');ctx.fillStyle=g;ctx.fillRect(32,32,1136,300);
-box(78,82,132,132,28,'#fff','#e8c879');ctx.fillStyle='#10264a';ctx.font='bold 66px Arial';ctx.textAlign='center';ctx.fillText('SB',144,170);
-ctx.textAlign='left';ctx.fillStyle='#fff';ctx.font='bold 49px Arial';ctx.fillText('SMARTBYTE',245,125);ctx.font='bold 42px Arial';ctx.fillText('TECHNOLOGIES',245,180);
-ctx.fillStyle='#d9eef2';ctx.font='23px Arial';ctx.fillText('COMPUTER  •  LAPTOP  •  IT SERVICES',245,228);ctx.fillText('+91 97023 87036  |  Mumbai',245,275);
-ctx.strokeStyle='#9ee5dc';ctx.lineWidth=8;ctx.lineCap='round';ctx.lineJoin='round';
-box(870,90,105,76,10,null,'#9ee5dc');ctx.beginPath();ctx.moveTo(855,180);ctx.lineTo(990,180);ctx.stroke();box(1010,90,92,76,10,null,'#9ee5dc');ctx.beginPath();ctx.moveTo(1000,180);ctx.lineTo(1112,180);ctx.stroke();
-ctx.fillStyle='#d9eef2';ctx.font='17px Arial';ctx.textAlign='center';ctx.fillText('LAPTOP',922,215);ctx.fillText('DESKTOP',1056,215);
-ctx.textAlign='left';box(72,365,1056,170,20,'#f0f8fa','#cce5e8');ctx.fillStyle='#0f766e';ctx.font='bold 26px Arial';ctx.fillText('COMPUTER & LAPTOP SERVICES',108,415);ctx.fillStyle='#17324d';ctx.font='23px Arial';ctx.fillText('Repairing  •  Software Installation  •  Hardware Support',108,465);ctx.fillText('New & Refurbished Laptop Sales  •  Old Laptop Buying',108,505);
-ctx.fillStyle='#10264a';ctx.font='bold 45px Arial';ctx.fillText('SERVICE BILL',82,620);ctx.fillStyle='#64748b';ctx.font='24px Arial';ctx.fillText('JOB ID: '+j.id,82,670);ctx.textAlign='right';ctx.fillText('DATE: '+(j.date||'-'),1115,670);ctx.textAlign='left';
-box(72,710,1056,235,22,'#f7fafc','#e0e8f0');ctx.fillStyle='#0f766e';ctx.font='bold 25px Arial';ctx.fillText('BILLED TO',110,765);ctx.fillStyle='#17243a';ctx.font='bold 39px Arial';ctx.fillText(String(customer.name||'Customer').slice(0,34),110,825);ctx.fillStyle='#475569';ctx.font='26px Arial';ctx.fillText('Mobile: '+String(customer.phone||customer.alt||'-'),110,880);ctx.fillText('Address: '+String(customer.address||'-').slice(0,58),110,920);
-box(72,975,1056,185,22,'#fff','#e0e8f0');ctx.fillStyle='#0f766e';ctx.font='bold 25px Arial';ctx.fillText('SERVICE DETAILS',110,1025);ctx.fillStyle='#17243a';ctx.font='bold 34px Arial';ctx.fillText(String(j.type||'Service').slice(0,42),110,1080);ctx.fillStyle='#475569';ctx.font='24px Arial';ctx.fillText('Work: '+String(j.description||'Service work').slice(0,62),110,1125);ctx.fillText('Status: '+String(j.status||'-'),110,1150);
-box(72,1190,1056,270,22,'#10264a');ctx.fillStyle='#dceaf5';ctx.font='26px Arial';ctx.fillText('TOTAL CHARGE',110,1250);ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='bold 33px Arial';ctx.fillText('Rs. '+Number(j.charge||0).toLocaleString('en-IN'),1088,1250);ctx.textAlign='left';ctx.fillStyle='#dceaf5';ctx.font='26px Arial';ctx.fillText('PAYMENT RECEIVED',110,1320);ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='bold 33px Arial';ctx.fillText('Rs. '+Number(j.paid||0).toLocaleString('en-IN'),1088,1320);ctx.textAlign='left';ctx.fillStyle='#7dd3c7';ctx.font='bold 30px Arial';ctx.fillText('BALANCE DUE',110,1400);ctx.textAlign='right';ctx.fillStyle='#7dd3c7';ctx.font='bold 38px Arial';ctx.fillText('Rs. '+due.toLocaleString('en-IN'),1088,1400);
-ctx.textAlign='center';ctx.fillStyle='#64748b';ctx.font='22px Arial';ctx.fillText('Thank you for choosing SMARTBYTE TECHNOLOGIES',600,1505);
+const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1697;
+const ctx=canvas.getContext('2d');
+const rounded=(x,y,w,h,r,fill,stroke)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}};
+const text=(value,x,y,size,color,weight='normal',align='left')=>{ctx.font=weight+' '+size+'px Arial';ctx.fillStyle=color;ctx.textAlign=align;ctx.fillText(String(value??''),x,y)};
+const wrap=(value,x,y,maxWidth,lineHeight,size,color,weight='normal',maxLines=2)=>{
+ctx.font=weight+' '+size+'px Arial';ctx.fillStyle=color;ctx.textAlign='left';
+const words=String(value||'-').split(/\\s+/);let line='',lines=[];
+for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}
+if(line)lines.push(line);lines.slice(0,maxLines).forEach((v,i)=>ctx.fillText(v,x,y+i*lineHeight));
+};
+const loadPhoto=url=>new Promise(resolve=>{const img=new Image();img.crossOrigin='anonymous';img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=url});
+ctx.fillStyle='#edf2f8';ctx.fillRect(0,0,1200,1697);
+rounded(28,28,1144,1641,26,'#ffffff','#d6e0eb');
+const hero=ctx.createLinearGradient(28,28,1172,350);hero.addColorStop(0,'#0b1d38');hero.addColorStop(.62,'#174d70');hero.addColorStop(1,'#176b78');ctx.fillStyle=hero;ctx.fillRect(28,28,1144,300);
+ctx.fillStyle='#d8b45c';ctx.fillRect(28,320,1144,8);
+ctx.beginPath();ctx.arc(135,130,66,0,Math.PI*2);ctx.fillStyle='#10264a';ctx.fill();ctx.strokeStyle='#e8c879';ctx.lineWidth=5;ctx.stroke();
+ctx.beginPath();ctx.arc(135,130,56,0,Math.PI*2);ctx.strokeStyle='#ffffff55';ctx.lineWidth=2;ctx.stroke();
+text('SB',135,151,57,'#ffffff','bold','center');
+text('SMARTBYTE',235,104,49,'#ffffff','bold');text('TECHNOLOGIES',235,158,42,'#e8c879','bold');
+text('COMPUTER  •  LAPTOP  •  IT SERVICES',238,207,22,'#d5e4f0','bold');
+text('REPAIR  •  SALES  •  SOFTWARE  •  HARDWARE',238,245,19,'#d5e4f0');
+text('+91 97023 87036  |  MUMBAI',238,282,20,'#ffffff','bold');
+text('SERVICE',1090,110,21,'#d5e4f0','bold','right');text('INVOICE',1090,160,38,'#ffffff','bold','right');text('PAYMENT RECEIPT',1090,197,17,'#e8c879','bold','right');
+const photos=await Promise.all([
+loadPhoto('https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=900&auto=format&fit=crop&q=85'),
+loadPhoto('https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=900&auto=format&fit=crop&q=85')
+]);
+rounded(64,360,1072,280,20,'#f3f6fa','#e2e8f0');
+if(photos[0]||photos[1]){
+const drawCrop=(img,x,y,w,h)=>{if(!img)return;ctx.save();ctx.beginPath();ctx.roundRect(x,y,w,h,14);ctx.clip();const scale=Math.max(w/img.width,h/img.height),sw=w/scale,sh=h/scale,sx=(img.width-sw)/2,sy=(img.height-sh)/2;ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);ctx.restore()};
+drawCrop(photos[0],80,376,510,210);drawCrop(photos[1],610,376,510,210);
+}else{
+rounded(82,392,500,170,14,'#e8eff7','#cbd8e6');rounded(618,392,500,170,14,'#e8eff7','#cbd8e6');
+text('LAPTOP REPAIR',332,500,30,'#174d70','bold','center');text('DESKTOP SUPPORT',868,500,30,'#174d70','bold','center');
+}
+text('LAPTOP REPAIR & UPGRADES',335,616,17,'#174d70','bold','center');text('DESKTOP & IT SUPPORT',865,616,17,'#174d70','bold','center');
+text('BILL TO',82,710,19,'#64748b','bold');text('INVOICE DETAILS',650,710,19,'#64748b','bold');
+rounded(64,735,510,208,16,'#f8fafc','#e2e8f0');rounded(600,735,536,208,16,'#f8fafc','#e2e8f0');
+text(customer.name||'Customer',88,790,32,'#10264a','bold');wrap('Mobile: '+(customer.phone||customer.alt||'-'),88,836,450,30,21,'#475569');wrap('Address: '+(customer.address||'-'),88,876,450,27,19,'#64748b', 'normal',2);
+text('JOB ID',626,790,17,'#64748b','bold');text(j.id,626,826,27,'#10264a','bold');text('INVOICE DATE',626,870,17,'#64748b','bold');text(j.date||'-',626,905,23,'#10264a','bold');
+text('SERVICE DETAILS',82,1010,20,'#64748b','bold');
+rounded(64,1035,1072,190,16,'#ffffff','#dce5ef');
+text('SERVICE / PRODUCT',92,1085,16,'#64748b','bold');wrap(j.type||'Service',92,1132,610,34,29,'#10264a','bold',2);
+text('WORK DESCRIPTION',92,1180,15,'#64748b','bold');wrap(j.description||'Service work',92,1210,990,26,19,'#475569','normal',1);
+rounded(64,1260,1072,330,18,'#10264a');
+text('PAYMENT SUMMARY',96,1310,20,'#d5e4f0','bold');
+text('TOTAL CHARGE',100,1370,22,'#d5e4f0');text('₹'+Number(j.charge||0).toLocaleString('en-IN'),1095,1370,29,'#ffffff','bold','right');
+text('PAYMENT RECEIVED',100,1435,22,'#d5e4f0');text('₹'+Number(j.paid||0).toLocaleString('en-IN'),1095,1435,29,'#ffffff','bold','right');
+ctx.fillStyle='#d8b45c';ctx.fillRect(96,1460,1008,2);
+text('BALANCE DUE',100,1525,26,'#e8c879','bold');text('₹'+due.toLocaleString('en-IN'),1095,1530,39,'#e8c879','bold','right');
+const status=due===0?'PAID':Number(j.paid||0)>0?'PARTIALLY PAID':'PAYMENT DUE';
+text(status,600,1570,18,'#d5e4f0','bold','center');
+text('Thank you for choosing SMARTBYTE TECHNOLOGIES',600,1630,19,'#64748b','bold','center');
 const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.94));
 if(!blob){alert('JPG बिल तयार करता आले नाही.');return}
 const file=new File([blob],'SmartByte-Bill-'+j.id+'.jpg',{type:'image/jpeg'});
-const message='SMARTBYTE TECHNOLOGIES - Service Bill\\nJob ID: '+j.id+'\\nCustomer: '+(customer.name||'Customer')+'\\nTotal: Rs. '+Number(j.charge||0).toLocaleString('en-IN')+' | Paid: Rs. '+Number(j.paid||0).toLocaleString('en-IN')+' | Balance: Rs. '+due.toLocaleString('en-IN')+'\\nContact: +91 97023 87036';
-if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){
-try{await navigator.share({files:[file],title:'SMARTBYTE TECHNOLOGIES Service Bill',text:message});}
-catch(e){if(e.name!=='AbortError')alert('शेअर करता आले नाही. पुन्हा प्रयत्न करा.')}
+if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+try{await navigator.share({files:[file],title:'SMARTBYTE TECHNOLOGIES Bill'});}
+catch(e){if(e.name!=='AbortError')alert('इमेज शेअर करता आली नाही. JPG डाउनलोड करून WhatsApp मध्ये Attach करा.')}
 }else{
-let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
-window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(message),'_blank','noopener');
-alert('JPG बिल डाउनलोड झाले आहे. WhatsApp मध्ये ग्राहकाला मेसेज पाठवा आणि JPG जोडण्यासाठी Attach > Gallery मधून डाउनलोड केलेले बिल निवडा.');
+const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+alert('फक्त JPG बिल डाउनलोड झाले आहे. WhatsApp उघडून Attach > Gallery मधून ही इमेज निवडा. कोणताही टेक्स्ट मेसेज तयार केलेला नाही.');
 }
 };window.editJob=jobId=>{let j=db.jobs.find(x=>x.id===jobId);if(!j)return;let s=prompt('Enter status: New / In Progress / Completed / Delivered / Cancelled',j.status);if(s===null)return;let p=prompt('Total payment received (₹)',j.paid);if(p===null)return;p=Number(p);if(!Number.isFinite(p)||p<0||p>j.charge){alert('Invalid payment amount.');return}j.status=s;j.paid=p;save()};$('#search').oninput=render;$('#customerSearch').oninput=render;
 function download(name,content,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}window.exportBackup=()=>download('SmartByte_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(db,null,2),'application/json');window.exportCSV=()=>{let lines=[['Job ID','Customer','Phone','Type','Date','Technician','Status','Charge','Paid','Due','Description'],...db.jobs.map(j=>{let c=db.customers.find(x=>x.id===j.customer)||{};return [j.id,c.name,c.phone,j.type,j.date,j.technician,j.status,j.charge,j.paid,j.charge-j.paid,j.description]})];download('SmartByte_Jobs.csv','\ufeff'+lines.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv;charset=utf-8')};$('#restore').onchange=e=>{let file=e.target.files[0];if(!file)return;let reader=new FileReader();reader.onload=()=>{try{let x=JSON.parse(reader.result);if(!Array.isArray(x.customers)||!Array.isArray(x.jobs))throw Error();if(confirm('Replace current data and restore this backup?')){db=x;save();alert('Backup restored.')}}catch{alert('This is not a valid SmartByte backup file.')}};reader.readAsText(file)};render();
