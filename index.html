@@ -31,72 +31,16 @@ let appointment=[j.appointmentDate,j.appointmentTime].filter(Boolean).join(' · 
 let w=window.open('','_blank');if(!w){alert('Pop-up blocked. Please allow pop-ups and try again.');return}
 let html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invoice '+esc(j.id)+'</title><style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#eef2f7;color:#17243a;margin:0;padding:28px}.invoice{max-width:780px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px #14213d18}.hero{background:linear-gradient(120deg,#10264a,#174d70);color:#fff;padding:30px 34px;display:flex;justify-content:space-between;gap:20px;align-items:center}.brand{display:flex;gap:14px;align-items:center}.logo{width:54px;height:54px;border:2px solid #7dd3c7;border-radius:14px;display:grid;place-items:center;font-weight:900;font-size:20px;color:#7dd3c7}.hero h1{font-size:22px;letter-spacing:1px;margin:0 0 6px}.hero p{margin:0;color:#d5e4f0;font-size:13px}.invtitle{text-align:right}.invtitle strong{display:block;font-size:23px;letter-spacing:2px}.invtitle span{font-size:12px;color:#c8d9e8}.body{padding:30px 34px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:25px}.panel{background:#f5f8fb;border:1px solid #e3eaf1;border-radius:12px;padding:16px}.kicker{font-size:10px;font-weight:bold;letter-spacing:1.4px;color:#61758a;margin-bottom:8px}.panel b{font-size:16px}.muted{color:#64748b;font-size:12px;line-height:1.7}.items{width:100%;border-collapse:collapse;margin:18px 0}.items th{background:#edf3f8;color:#53677d;text-align:left;font-size:11px;letter-spacing:.7px;padding:13px}.items td{padding:16px 13px;border-bottom:1px solid #e7edf3;font-size:13px}.right{text-align:right}.totals{margin-left:auto;width:min(100%,330px)}.totals div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #edf1f5;font-size:13px}.totals .due{margin-top:8px;padding:15px;background:#fff4e8;border:1px solid #ffdfbd;border-radius:10px;font-weight:bold;font-size:17px;color:#a64b00}.pill{display:inline-block;background:#e4f7ef;color:#087443;padding:7px 12px;border-radius:30px;font-size:11px;font-weight:bold}.footer{margin-top:28px;border-top:1px solid #e7edf3;padding-top:18px;display:flex;justify-content:space-between;gap:20px}.thanks{font-size:14px;font-weight:bold;color:#174d70}.actions{max-width:780px;margin:18px auto;text-align:right}.actions button{background:#174d70;color:#fff;border:0;border-radius:8px;padding:12px 18px;font-weight:bold}@media(max-width:600px){body{padding:8px}.hero,.body{padding:20px}.hero{align-items:flex-start}.meta{grid-template-columns:1fr}.invtitle strong{font-size:17px}}@media print{body{background:#fff;padding:0}.invoice{box-shadow:none;border-radius:0}.actions{display:none}}</style></head><body><div class="invoice"><header class="hero"><div class="brand"><div class="logo">SB</div><div><h1>SMARTBYTE TECHNOLOGIES</h1><p>Admin & Service Management · Mumbai</p><p>Contact: +91 97023 87036</p></div></div><div class="invtitle"><strong>INVOICE</strong><span>SERVICE BILL / PAYMENT RECEIPT</span></div></header><main class="body"><div class="meta"><section class="panel"><div class="kicker">BILLED TO</div><b>'+esc(customer.name||'Customer')+'</b><div class="muted">Mobile: '+esc(customer.phone||'-')+'<br>Address: '+esc(customer.address||'-')+'</div></section><section class="panel"><div class="kicker">INVOICE DETAILS</div><b>'+esc(j.id)+'</b><div class="muted">Invoice Date: '+esc(j.date||'-')+'<br>Appointment: '+esc(appointment)+'</div></section></div><div class="kicker">SERVICE SUMMARY</div><table class="items"><thead><tr><th>DESCRIPTION</th><th>STATUS</th><th class="right">AMOUNT</th></tr></thead><tbody><tr><td><b>'+esc(j.type||'Service')+'</b><div class="muted">'+esc(j.description||'Service work')+'</div></td><td>'+esc(j.status||'-')+'</td><td class="right"><b>'+money(j.charge)+'</b></td></tr></tbody></table><div class="totals"><div><span>Total Charge</span><b>'+money(j.charge)+'</b></div><div><span>Payment Received</span><b>'+money(j.paid)+'</b></div><div class="due"><span>Balance Due</span><span>'+money(due)+'</span></div><p><span class="pill">'+status+'</span></p></div><div class="footer"><div><div class="thanks">Thank you for choosing SmartByte!</div><div class="muted">For billing queries, contact +91 97023 87036.</div></div><div class="muted">SMARTBYTE TECHNOLOGIES<br>Mumbai</div></div></main></div><div class="actions"><button onclick="window.print()">Print / Save as PDF</button></div></body></html>';
 w.document.open();w.document.write(html);w.document.close();
-};window.sendBillWhatsApp=async jobId=>{
+};window.sendBillWhatsApp=jobId=>{
 let j=db.jobs.find(x=>x.id===jobId);if(!j)return;
 let customer=db.customers.find(x=>x.id===j.customer)||{};
-const normalize=n=>{let p=String(n||'').replace(/\D/g,'');if(p.length===10)return '91'+p;if(p.length===11&&p.startsWith('0'))return '91'+p.slice(1);if(p.length===12&&p.startsWith('91'))return p;return ''};
+const normalize=n=>{let p=String(n||'').replace(/\\D/g,'');if(p.length===10)return '91'+p;if(p.length===11&&p.startsWith('0'))return '91'+p.slice(1);if(p.length===12&&p.startsWith('91'))return p;return ''};
 let phone=normalize(customer.phone)||normalize(customer.alt);
 if(!phone){alert('या ग्राहकाचा योग्य 10 अंकी मोबाइल नंबर Customer Details मध्ये तपासा.');return}
 let due=Math.max(0,Number(j.charge||0)-Number(j.paid||0));
-let canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1760;
-let ctx=canvas.getContext('2d');
-const round=(x,y,w,h,r,fill,stroke)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}};
-ctx.fillStyle='#edf2f8';ctx.fillRect(0,0,1200,1760);
-round(32,32,1136,1696,34,'#ffffff','#dce5ef');
-ctx.save();ctx.beginPath();ctx.roundRect(32,32,1136,350,[34,34,0,0]);ctx.clip();
-let grad=ctx.createLinearGradient(32,32,1168,382);grad.addColorStop(0,'#0b1f3a');grad.addColorStop(.58,'#124d70');grad.addColorStop(1,'#087f83');ctx.fillStyle=grad;ctx.fillRect(32,32,1136,350);ctx.restore();
-// SB monogram and company heading
-round(78,82,132,132,28,'#ffffff');ctx.fillStyle='#10264a';ctx.font='bold 66px Arial';ctx.textAlign='center';ctx.fillText('SB',144,170);
-ctx.textAlign='left';ctx.fillStyle='#ffffff';ctx.font='bold 51px Arial';ctx.fillText('SMARTBYTE',245,125);ctx.font='bold 43px Arial';ctx.fillText('TECHNOLOGIES',245,180);
-ctx.fillStyle='#d9eef2';ctx.font='24px Arial';ctx.fillText('COMPUTER  •  LAPTOP  •  IT SERVICES',245,228);
-ctx.font='25px Arial';ctx.fillText('+91 97023 87036  |  Mumbai',245,278);
-// Computer and laptop illustrations, drawn as clean line icons
-ctx.strokeStyle='#9ee5dc';ctx.lineWidth=8;ctx.lineCap='round';ctx.lineJoin='round';
-round(865,95,105,72,9,null,'#9ee5dc');ctx.beginPath();ctx.moveTo(850,180);ctx.lineTo(985,180);ctx.lineTo(972,192);ctx.lineTo(864,192);ctx.closePath();ctx.stroke();
-round(1010,95,92,72,9,null,'#9ee5dc');ctx.beginPath();ctx.moveTo(1000,180);ctx.lineTo(1112,180);ctx.stroke();
-ctx.fillStyle='#d9eef2';ctx.font='17px Arial';ctx.textAlign='center';ctx.fillText('LAPTOP',918,220);ctx.fillText('DESKTOP',1056,220);
-// Services strip: clear and readable advertising
-round(72,410,1056,205,22,'#f0f8fa','#cce5e8');
-ctx.textAlign='left';ctx.fillStyle='#0f766e';ctx.font='bold 27px Arial';ctx.fillText('OUR SERVICES',108,458);
-ctx.fillStyle='#17324d';ctx.font='24px Arial';
-ctx.fillText('• Laptop & Computer Repairing',108,505);
-ctx.fillText('• New Laptop Sales  •  Refurbished Laptop Sales',108,547);
-ctx.fillText('• Old Laptop Buying & Selling',108,589);
-// Invoice identity
-ctx.fillStyle='#10264a';ctx.font='bold 46px Arial';ctx.fillText('SERVICE BILL',82,690);
-ctx.fillStyle='#64748b';ctx.font='24px Arial';ctx.fillText('JOB ID: '+j.id,82,738);ctx.textAlign='right';ctx.fillText('DATE: '+(j.date||'-'),1115,738);ctx.textAlign='left';
-// Customer block
-round(72,775,1056,270,22,'#f7fafc','#e0e8f0');
-ctx.fillStyle='#0f766e';ctx.font='bold 25px Arial';ctx.fillText('BILLED TO',110,828);
-ctx.fillStyle='#17243a';ctx.font='bold 39px Arial';ctx.fillText(String(customer.name||'Customer').slice(0,34),110,885);
-ctx.font='27px Arial';ctx.fillStyle='#475569';ctx.fillText('Mobile: '+String(customer.phone||customer.alt||'-'),110,940);
-ctx.fillText('Address: '+String(customer.address||'-').slice(0,52),110,995);
-// Job-specific service block
-round(72,1070,1056,220,22,'#ffffff','#e0e8f0');
-ctx.fillStyle='#0f766e';ctx.font='bold 25px Arial';ctx.fillText('JOB DETAILS',110,1120);
-ctx.fillStyle='#17243a';ctx.font='bold 35px Arial';ctx.fillText(String(j.type||'Service').slice(0,42),110,1178);
-ctx.font='25px Arial';ctx.fillStyle='#475569';ctx.fillText('Work: '+String(j.description||'Service work').slice(0,54),110,1225);
-ctx.fillText('Status: '+String(j.status||'-'),110,1265);
-// Payment summary
-round(72,1320,1056,300,24,'#10264a');
-ctx.fillStyle='#dceaf5';ctx.font='27px Arial';ctx.fillText('TOTAL CHARGE',110,1385);ctx.textAlign='right';ctx.fillStyle='#ffffff';ctx.font='bold 34px Arial';ctx.fillText('Rs. '+Number(j.charge||0).toLocaleString('en-IN'),1088,1385);
-ctx.textAlign='left';ctx.fillStyle='#dceaf5';ctx.font='27px Arial';ctx.fillText('PAYMENT RECEIVED',110,1455);ctx.textAlign='right';ctx.fillStyle='#ffffff';ctx.font='bold 34px Arial';ctx.fillText('Rs. '+Number(j.paid||0).toLocaleString('en-IN'),1088,1455);
-ctx.textAlign='left';ctx.fillStyle='#7dd3c7';ctx.font='bold 31px Arial';ctx.fillText('BALANCE DUE',110,1535);ctx.textAlign='right';ctx.fillStyle='#7dd3c7';ctx.font='bold 40px Arial';ctx.fillText('Rs. '+due.toLocaleString('en-IN'),1088,1535);
-ctx.textAlign='center';ctx.fillStyle='#64748b';ctx.font='23px Arial';ctx.fillText('Thank you for choosing SMARTBYTE TECHNOLOGIES',600,1655);
-const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.94));
-if(!blob){alert('JPG बिल तयार करता आले नाही. पुन्हा प्रयत्न करा.');return}
-const file=new File([blob],'SmartByte-Bill-'+j.id+'.jpg',{type:'image/jpeg'});
-const caption='SMARTBYTE TECHNOLOGIES - Service Bill\nCustomer: '+(customer.name||'')+'\nJob ID: '+j.id+'\nTotal: Rs. '+Number(j.charge||0)+' | Paid: Rs. '+Number(j.paid||0)+' | Due: Rs. '+due;
-if(navigator.share){
- try{
-  if(!navigator.canShare||navigator.canShare({files:[file]})){
-   await navigator.share({files:[file],title:'SmartByte Service Bill',text:caption});
-   return;
-  }
- }catch(e){if(e&&e.name==='AbortError')return}
-}
-const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
-alert('JPG बिल डाउनलोड झाले. या ब्राउझरमध्ये थेट फाइल शेअरिंग उपलब्ध नाही. WhatsApp मध्ये ग्राहकाचा चॅट उघडून फोटो जोडावा लागेल.');
+let message='*SMARTBYTE TECHNOLOGIES*\\nComputer & Laptop Services\\n\\n*SERVICE BILL*\\nJob ID: '+j.id+'\\nDate: '+(j.date||'-')+'\\nCustomer: '+(customer.name||'Customer')+'\\nMobile: '+(customer.phone||customer.alt||'-')+'\\nService: '+(j.type||'-')+'\\nStatus: '+(j.status||'-')+'\\n\\nTotal Amount: Rs. '+Number(j.charge||0).toLocaleString('en-IN')+'\\nPaid: Rs. '+Number(j.paid||0).toLocaleString('en-IN')+'\\n*Balance Due: Rs. '+due.toLocaleString('en-IN')+'*\\n\\nThank you for choosing SMARTBYTE TECHNOLOGIES.\\nContact: +91 97023 87036';
+let url='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+window.open(url,'_blank','noopener');
 };window.editJob=jobId=>{let j=db.jobs.find(x=>x.id===jobId);if(!j)return;let s=prompt('Enter status: New / In Progress / Completed / Delivered / Cancelled',j.status);if(s===null)return;let p=prompt('Total payment received (₹)',j.paid);if(p===null)return;p=Number(p);if(!Number.isFinite(p)||p<0||p>j.charge){alert('Invalid payment amount.');return}j.status=s;j.paid=p;save()};$('#search').oninput=render;$('#customerSearch').oninput=render;
 function download(name,content,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}window.exportBackup=()=>download('SmartByte_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(db,null,2),'application/json');window.exportCSV=()=>{let lines=[['Job ID','Customer','Phone','Type','Date','Technician','Status','Charge','Paid','Due','Description'],...db.jobs.map(j=>{let c=db.customers.find(x=>x.id===j.customer)||{};return [j.id,c.name,c.phone,j.type,j.date,j.technician,j.status,j.charge,j.paid,j.charge-j.paid,j.description]})];download('SmartByte_Jobs.csv','\ufeff'+lines.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv;charset=utf-8')};$('#restore').onchange=e=>{let file=e.target.files[0];if(!file)return;let reader=new FileReader();reader.onload=()=>{try{let x=JSON.parse(reader.result);if(!Array.isArray(x.customers)||!Array.isArray(x.jobs))throw Error();if(confirm('Replace current data and restore this backup?')){db=x;save();alert('Backup restored.')}}catch{alert('This is not a valid SmartByte backup file.')}};reader.readAsText(file)};render();
 let installPrompt;const installBtn=document.getElementById('installBtn');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;installBtn.style.display='inline-block'});installBtn.addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;installBtn.style.display='none'});if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
