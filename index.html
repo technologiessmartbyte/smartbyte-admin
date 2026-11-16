@@ -54,13 +54,17 @@ pdf.setFont('helvetica','bold');pdf.setFontSize(13);pdf.setTextColor(166,75,0);p
 pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.setTextColor(70,85,100);pdf.text('Thank you for choosing SmartByte Technologies!',15,235);pdf.text('For billing queries: +91 97023 87036',15,242);
 let fileName='SmartByte-Invoice-'+j.id+'.pdf';let blob=pdf.output('blob');let file=new File([blob],fileName,{type:'application/pdf'});
 let caption='SMARTBYTE TECHNOLOGIES - Service Invoice\nJob ID: '+j.id+'\nCustomer: '+(customer.name||'')+'\nTotal: INR '+Number(j.charge||0).toFixed(2)+' | Paid: INR '+Number(j.paid||0).toFixed(2)+' | Due: INR '+due.toFixed(2);
-if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
- try{await navigator.share({files:[file],title:'SmartByte Service Invoice',text:caption});return}
- catch(e){if(e&&e.name==='AbortError')return}
+if(navigator.share){
+ try{
+  let fileShareSupported=!navigator.canShare||navigator.canShare({files:[file]});
+  if(fileShareSupported){
+   await navigator.share({files:[file],title:'SmartByte Service Invoice',text:caption});
+   return;
+  }
+ }catch(e){if(e&&e.name==='AbortError')return}
 }
 pdf.save(fileName);
-window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(caption),'_blank');
-alert('PDF डाउनलोड झाले आहे. WhatsApp चॅटमध्ये Attach / 📎 > Document निवडा आणि Downloads मधील '+fileName+' पाठवा.');
+alert('या मोबाईल/ब्राउझरमध्ये PDF थेट Share करण्याची सुविधा उपलब्ध नाही. PDF डाउनलोड झाली आहे. WhatsApp मध्ये ग्राहकाचा चॅट उघडा आणि 📎 > Document मधून '+fileName+' निवडून पाठवा.');
 };window.editJob=jobId=>{let j=db.jobs.find(x=>x.id===jobId);if(!j)return;let s=prompt('Enter status: New / In Progress / Completed / Delivered / Cancelled',j.status);if(s===null)return;let p=prompt('Total payment received (₹)',j.paid);if(p===null)return;p=Number(p);if(!Number.isFinite(p)||p<0||p>j.charge){alert('Invalid payment amount.');return}j.status=s;j.paid=p;save()};$('#search').oninput=render;$('#customerSearch').oninput=render;
 function download(name,content,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}window.exportBackup=()=>download('SmartByte_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(db,null,2),'application/json');window.exportCSV=()=>{let lines=[['Job ID','Customer','Phone','Type','Date','Technician','Status','Charge','Paid','Due','Description'],...db.jobs.map(j=>{let c=db.customers.find(x=>x.id===j.customer)||{};return [j.id,c.name,c.phone,j.type,j.date,j.technician,j.status,j.charge,j.paid,j.charge-j.paid,j.description]})];download('SmartByte_Jobs.csv','\ufeff'+lines.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv;charset=utf-8')};$('#restore').onchange=e=>{let file=e.target.files[0];if(!file)return;let reader=new FileReader();reader.onload=()=>{try{let x=JSON.parse(reader.result);if(!Array.isArray(x.customers)||!Array.isArray(x.jobs))throw Error();if(confirm('Replace current data and restore this backup?')){db=x;save();alert('Backup restored.')}}catch{alert('This is not a valid SmartByte backup file.')}};reader.readAsText(file)};render();
 let installPrompt;const installBtn=document.getElementById('installBtn');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;installBtn.style.display='inline-block'});installBtn.addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;installBtn.style.display='none'});if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
