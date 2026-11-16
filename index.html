@@ -34,10 +34,10 @@ w.document.open();w.document.write(html);w.document.close();
 };window.sendBillWhatsApp=async jobId=>{
 let j=db.jobs.find(x=>x.id===jobId);if(!j)return;
 let customer=db.customers.find(x=>x.id===j.customer)||{};
-let customerDigits=String(customer.phone||customer.alt||'').replace(/\\D/g,'');
+let customerDigits=String(customer.phone||customer.alt||'').replace(/\D/g,'');
 if(customerDigits.length===11&&customerDigits.startsWith('0'))customerDigits=customerDigits.slice(1);
 if(customerDigits.length===10)customerDigits='91'+customerDigits;
-if(!/^91[6-9]\\d{9}$/.test(customerDigits)){alert('या ग्राहकाचा योग्य 10 अंकी मोबाईल नंबर आधी Customer Details मध्ये भरा.');return}
+if(!/^91[6-9]\d{9}$/.test(customerDigits)){alert('या ग्राहकाचा योग्य 10 अंकी मोबाईल नंबर आधी Customer Details मध्ये भरा.');return}
 const waWindow=window.open('about:blank','_blank');
 if(!waWindow){alert('WhatsApp उघडण्यासाठी browser pop-ups allow करा.');return}
 let due=Math.max(0,Number(j.charge||0)-Number(j.paid||0));
