@@ -34,6 +34,12 @@ w.document.open();w.document.write(html);w.document.close();
 };window.sendBillWhatsApp=async jobId=>{
 let j=db.jobs.find(x=>x.id===jobId);if(!j)return;
 let customer=db.customers.find(x=>x.id===j.customer)||{};
+let customerDigits=String(customer.phone||customer.alt||'').replace(/\\D/g,'');
+if(customerDigits.length===11&&customerDigits.startsWith('0'))customerDigits=customerDigits.slice(1);
+if(customerDigits.length===10)customerDigits='91'+customerDigits;
+if(!/^91[6-9]\\d{9}$/.test(customerDigits)){alert('या ग्राहकाचा योग्य 10 अंकी मोबाईल नंबर आधी Customer Details मध्ये भरा.');return}
+const waWindow=window.open('about:blank','_blank');
+if(!waWindow){alert('WhatsApp उघडण्यासाठी browser pop-ups allow करा.');return}
 let due=Math.max(0,Number(j.charge||0)-Number(j.paid||0));
 const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1697;
 const ctx=canvas.getContext('2d');
@@ -93,13 +99,9 @@ text('Thank you for choosing SMARTBYTE TECHNOLOGIES',600,1630,19,'#64748b','bold
 const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.94));
 if(!blob){alert('JPG बिल तयार करता आले नाही.');return}
 const file=new File([blob],'SmartByte-Bill-'+j.id+'.jpg',{type:'image/jpeg'});
-if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-try{await navigator.share({files:[file],title:'SMARTBYTE TECHNOLOGIES Bill'});}
-catch(e){if(e.name!=='AbortError')alert('इमेज शेअर करता आली नाही. JPG डाउनलोड करून WhatsApp मध्ये Attach करा.')}
-}else{
-const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
-alert('फक्त JPG बिल डाउनलोड झाले आहे. WhatsApp उघडून Attach > Gallery मधून ही इमेज निवडा. कोणताही टेक्स्ट मेसेज तयार केलेला नाही.');
-}
+const imageUrl=URL.createObjectURL(blob);const a=document.createElement('a');a.href=imageUrl;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(imageUrl),10000);
+waWindow.location.href='https://wa.me/'+customerDigits;
+alert('ग्राहकाची WhatsApp चॅट उघडली आहे आणि JPG बिल डाउनलोड झाले आहे. चॅटमध्ये Attach > Gallery मधून SmartByte-Bill इमेज निवडून Send करा.');
 };window.editJob=jobId=>{let j=db.jobs.find(x=>x.id===jobId);if(!j)return;let s=prompt('Enter status: New / In Progress / Completed / Delivered / Cancelled',j.status);if(s===null)return;let p=prompt('Total payment received (₹)',j.paid);if(p===null)return;p=Number(p);if(!Number.isFinite(p)||p<0||p>j.charge){alert('Invalid payment amount.');return}j.status=s;j.paid=p;save()};$('#search').oninput=render;$('#customerSearch').oninput=render;
 function download(name,content,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}window.exportBackup=()=>download('SmartByte_Backup_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(db,null,2),'application/json');window.exportCSV=()=>{let lines=[['Job ID','Customer','Phone','Type','Date','Technician','Status','Charge','Paid','Due','Description'],...db.jobs.map(j=>{let c=db.customers.find(x=>x.id===j.customer)||{};return [j.id,c.name,c.phone,j.type,j.date,j.technician,j.status,j.charge,j.paid,j.charge-j.paid,j.description]})];download('SmartByte_Jobs.csv','\ufeff'+lines.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv;charset=utf-8')};$('#restore').onchange=e=>{let file=e.target.files[0];if(!file)return;let reader=new FileReader();reader.onload=()=>{try{let x=JSON.parse(reader.result);if(!Array.isArray(x.customers)||!Array.isArray(x.jobs))throw Error();if(confirm('Replace current data and restore this backup?')){db=x;save();alert('Backup restored.')}}catch{alert('This is not a valid SmartByte backup file.')}};reader.readAsText(file)};render();
 let installPrompt;const installBtn=document.getElementById('installBtn');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;installBtn.style.display='inline-block'});installBtn.addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;installBtn.style.display='none'});if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
