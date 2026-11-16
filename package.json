@@ -1,0 +1,16 @@
+{
+  "name": "smartbyte-technologies-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SMARTBYTE TECHNOLOGIES Admin Android package",
+  "scripts": {
+    "build": "node scripts/copy-web.js"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  }
+}
