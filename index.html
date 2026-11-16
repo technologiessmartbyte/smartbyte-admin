@@ -37,7 +37,13 @@ let customer=db.customers.find(x=>x.id===j.customer)||{};
 let phone=String(customer.phone||'').replace(/\D/g,'');
 if(phone.length===10)phone='91'+phone;else if(phone.length===11&&phone.startsWith('0'))phone='91'+phone.slice(1);
 if(phone.length!==12||!phone.startsWith('91')){alert('या ग्राहकाचा योग्य 10 अंकी भारतीय मोबाइल नंबर Customer Details मध्ये तपासा.');return}
-if(!window.jspdf||!window.jspdf.jsPDF){alert('PDF सुविधा लोड झाली नाही. इंटरनेट सुरू करून पेज Refresh करा आणि पुन्हा प्रयत्न करा.');return}
+if(!window.jspdf||!window.jspdf.jsPDF){
+ const urls=['https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js','https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js'];
+ for(const src of urls){
+  try{await new Promise((resolve,reject)=>{let tag=document.createElement('script');tag.src=src;tag.onload=resolve;tag.onerror=()=>reject(new Error('load failed'));document.head.appendChild(tag)});if(window.jspdf&&window.jspdf.jsPDF)break}catch(e){}
+ }
+}
+if(!window.jspdf||!window.jspdf.jsPDF){alert('PDF लायब्ररी इंटरनेटवरून लोड झाली नाही. इंटरनेट कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.');return}
 let due=Math.max(0,Number(j.charge||0)-Number(j.paid||0));
 let pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
 pdf.setFillColor(16,38,74);pdf.rect(0,0,210,42,'F');
