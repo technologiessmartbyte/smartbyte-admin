@@ -4,7 +4,7 @@ const path = require('path');
 const htmlPath = path.join(process.cwd(), 'www', 'index.html');
 let html = fs.readFileSync(htmlPath, 'utf8');
 const start = html.indexOf('async function deliverJpg(');
-const end = html.indexOf('\n\nwindow.downloadQuoteJpg', start);
+const end = html.indexOf('window.downloadQuoteJpg', start);
 if (start < 0 || end < 0) throw new Error('Could not locate JPG delivery function');
 
 const replacement = `async function deliverJpg(blob,name,label){
