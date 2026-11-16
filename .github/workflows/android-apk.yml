@@ -1,6 +1,17 @@
 name: Build SMARTBYTE Android APK
 
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/android-apk.yml"
+      - "package.json"
+      - "capacitor.config.json"
+      - "scripts/**"
+      - "index.html"
+      - "manifest.webmanifest"
+      - "sw.js"
+      - "icon-512.png"
   workflow_dispatch:
 
 permissions:
