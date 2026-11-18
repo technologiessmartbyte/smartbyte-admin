@@ -1,36 +1,49 @@
-# SMARTBYTE Activation & Annual Subscription
+# SMARTBYTE Cash Subscription & Activation
+
+## Approved business rules
+- One-service annual plan: INR 999 for 365 days.
+- Two-service annual plan: INR 1,499 for 365 days.
+- Payment method: CASH ONLY. Do not show Razorpay, UPI, card, net banking, or online payment options.
+- Customer chooses a plan and submits name, mobile number, and preferred visit details.
+- Customer pays only after meeting an authorized SMARTBYTE TECHNOLOGIES representative in person and verifying company identity.
+- The representative gives an official receipt.
+- Customer cannot mark their own order as paid or activate the license.
 
 ## Customer flow
 1. Customer selects one-service or two-service annual plan.
-2. Customer enters name, mobile number and email.
-3. Customer chooses Online Payment or Cash on Visit.
-4. Online orders are activated only after the server verifies the payment gateway signature/webhook.
-5. Cash on Visit requests remain PENDING until an owner-authorized account confirms receipt.
-6. On confirmed payment, the server issues a unique activation code/license valid for 365 days from confirmation.
-7. The app validates the license with the server and binds it to the permitted device(s). Expired or revoked licenses are locked.
+2. Customer submits name, mobile number, and visit/contact preference.
+3. App displays the Cash on Visit safety notice and creates a request with status PENDING.
+4. An authorized representative visits the customer. Customer verifies the representative's company identity before handing over cash.
+5. Representative records the payment in the authenticated owner/admin system.
+6. Owner confirms receipt. The server records amount, plan, date, representative, and receipt/reference number.
+7. Only after owner confirmation, the server issues a unique activation code/license valid for 365 days from the confirmed payment date.
+8. App validates the license with the server. Expired or revoked licenses are locked.
 
-## Annual plans
-- One service: ₹999 for 365 days.
-- Two services: ₹1,499 for 365 days.
-- Both plans support Online Payment and Cash on Visit. The 365-day term starts only after payment is confirmed.
+## Customer safety notice
+**Cash payment only:** Please pay only after an authorized SMARTBYTE TECHNOLOGIES representative meets you in person and you verify their company identity. Ask for an official receipt. Do not send money online, transfer money to a personal UPI ID, or share OTPs, passwords, or banking PINs. Your app is activated only after SMARTBYTE confirms receipt of cash.
 
-## Customer trust notice
-**Pay safely:** To avoid online fraud, choose Cash on Visit if you prefer. Pay only after an authorized SMARTBYTE TECHNOLOGIES representative visits and you verify their company identity. Ask for an official receipt. Do not transfer money to an unknown person or share OTPs, passwords or banking PINs. Activation is issued only after SMARTBYTE confirms receipt of payment.
+## Owner/admin requirements
+- Owner-only authenticated login; never hard-code owner passwords or master activation keys in the app.
+- List customer requests with PENDING, PAID, ACTIVATED, EXPIRED, and CANCELLED statuses.
+- Owner confirmation required before activation.
+- Record payment amount, plan, date/time, representative, and receipt number; maintain an audit log.
+- Generate unique, non-guessable activation codes on the server; store hashes where practical.
+- Support expiry, renewal, revocation, device binding, and rate-limited activation attempts.
+- Owner can correct mistakes with an auditable action; customers cannot change payment status.
 
-## Required security design
-- No activation master key, payment secret, or owner credential may be shipped in the Android app or public frontend.
-- The public app must never be trusted to mark an order as paid.
-- Payment order creation, signature/webhook verification, license issuance, expiry checks, revocation and device binding must run on a trusted backend.
-- Cash requests must be owner-confirmed on an authenticated owner dashboard.
-- Store only hashed activation codes where practical; rate-limit activation attempts and audit owner actions.
-- Do not store card, UPI PIN, OTP, or bank-login credentials.
+## Current repository / implementation status
+The repository currently contains a static HTML/JavaScript admin app packaged with Capacitor. It does not currently contain a backend API, database, owner authentication, cash-payment ledger, or activation/license service. A static frontend alone cannot securely enforce payment confirmation or a one-year activation lock. Do not claim these features are live or distribute an APK as production-ready until the backend is deployed and the complete flow is tested.
 
-## Current implementation status
-This repository currently contains a local/offline admin app and does not have a server API, database, owner authentication, activation service, or payment gateway. Therefore this document is a design/implementation checklist, not a working activation system. Do not advertise activation or online payment as live until the backend and payment verification are deployed and tested.
+## Remaining implementation work
+1. Choose and provision a secure backend/database (for example, a managed database plus server-side functions).
+2. Implement owner authentication and role-protected admin endpoints.
+3. Implement customer cash-payment requests and owner-only payment confirmation.
+4. Implement server-side license issuance, 365-day expiry, renewal, revocation, and device binding.
+5. Connect the Android app to the API; remove any client-side trust for paid/activated states.
+6. Test pending cash requests, owner confirmation, duplicate confirmation prevention, incorrect codes, expiry, renewal, revoked licenses, and offline behavior.
+7. Build a new APK and verify it on a real Android phone before release.
 
-## Decisions/configuration still needed before production
-- Approved prices: one-service annual plan ₹999 / 365 days; two-service annual plan ₹1,499 / 365 days.
-- Payment gateway merchant account and KYC (Razorpay is a candidate; not connected yet).
-- A secure backend/database deployment and owner-only authentication.
-- Policy for device limit and temporary offline validation.
-- Cash on Visit requests remain pending until the owner confirms receipt in the owner dashboard; customers cannot self-confirm cash payments.
+## Security and privacy
+- Never commit API secrets, signing keys, passwords, OTPs, or customer identity documents to this public repository.
+- Do not collect Aadhaar/PAN or other KYC data inside the app unless legally necessary and appropriately secured.
+- Keep only the minimum customer details needed to arrange the visit and issue a receipt.
